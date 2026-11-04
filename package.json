@@ -1,18 +1,25 @@
 {
   "name": "tendro-docs",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "TENDRO documentation tracker",
   "main": "server.js",
   "scripts": {
-    "start": "node --disable-warning=ExperimentalWarning server.js"
+    "start": "node server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
   },
   "license": "UNLICENSED",
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "express": "^5.3.0"
+    "express": "^5.3.0",
+    "multer": "^2.5.0",
+    "pg": "^8.23.1"
   },
   "engines": {
-    "node": ">=22.13"
+    "node": ">=20"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.14",
+    "@electric-sql/pglite-socket": "^0.2.17"
+  }
 }

@@ -2,9 +2,9 @@
   const root = document.documentElement;
   const englishUi = root.lang === 'en';
   const authMessages = englishUi ? {
-    show: 'Show password', hide: 'Hide password', required: 'This field is required.', short: 'Use at least 6 characters.', mismatch: 'The new passwords do not match.'
+    show: 'Show password', hide: 'Hide password', required: 'This field is required.', short: 'Use at least 8 characters.', mismatch: 'The new passwords do not match.'
   } : {
-    show: 'أظهر كلمة المرور', hide: 'أخفِ كلمة المرور', required: 'هذا الحقل مطلوب.', short: 'استخدم 6 أحرف على الأقل.', mismatch: 'كلمتا المرور الجديدتان غير متطابقتين.'
+    show: 'أظهر كلمة المرور', hide: 'أخفِ كلمة المرور', required: 'هذا الحقل مطلوب.', short: 'استخدم 8 أحرف على الأقل.', mismatch: 'كلمتا المرور الجديدتان غير متطابقتين.'
   };
   const themeButton = document.querySelector('#theme-toggle');
   let theme = 'light';
@@ -13,7 +13,9 @@
     theme = value === 'dark' ? 'dark' : 'light';
     root.dataset.theme = theme;
     if (themeButton) {
-      themeButton.textContent = theme === 'dark' ? themeButton.dataset.lightLabel : themeButton.dataset.darkLabel;
+      const label = theme === 'dark' ? themeButton.dataset.lightLabel : themeButton.dataset.darkLabel;
+      if (themeButton.dataset.icon) { themeButton.setAttribute('aria-label', label); themeButton.title = label; } // icon button: the CSS swaps moon/sun
+      else themeButton.textContent = label;
       themeButton.setAttribute('aria-pressed', String(theme === 'dark'));
     }
   };
@@ -104,7 +106,7 @@
   const form = document.querySelector('#section-form');
   if (!form) return;
 
-  const match = location.pathname.match(/^\/s\/(\d+)/);
+  const match = location.pathname.match(/^\/(?:sections|s)\/(\d+)/);
   if (!match) return;
   const sectionId = match[1];
   const draftKey = `tendro-section-draft:${sectionId}`;
@@ -232,7 +234,7 @@
     deleteButton.disabled = true;
     storeDraft();
     try {
-      const response = await fetch(`/c/${commentId}/delete`, {
+      const response = await fetch(`/comments/${commentId}/delete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
@@ -344,4 +346,30 @@
       button.disabled = false;
     }
   });
+})();
+
+// notifications bell: refresh the unread count once a minute while the page is visible
+(() => {
+  const badge = document.querySelector('#bell-count');
+  if (!badge) return;
+  const refresh = async () => {
+    if (document.hidden) return;
+    try {
+      const response = await fetch('/notifications/count', { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+      if (!response.ok) return;
+      const { unread } = await response.json();
+      badge.textContent = unread > 9 ? '9+' : String(unread);
+      badge.hidden = !unread;
+    } catch { /* offline: keep the old number */ }
+  };
+  setInterval(refresh, 60000);
+  document.addEventListener('visibilitychange', refresh);
+})();
+
+// account menu: close on outside click or Escape
+(() => {
+  const menu = document.querySelector('.usermenu');
+  if (!menu) return;
+  document.addEventListener('click', (event) => { if (menu.open && !menu.contains(event.target)) menu.open = false; });
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); } });
 })();

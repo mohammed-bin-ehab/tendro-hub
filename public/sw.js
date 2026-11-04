@@ -1,10 +1,10 @@
-const CACHE_NAME = 'tendro-shell-v2';
+const CACHE_NAME = 'tendro-shell-v8';
 const SHELL_FILES = [
   '/static/offline.html',
   '/static/offline.css',
   '/static/tendro-hub.svg',
-  '/static/style.css?v=12',
-  '/static/app.js?v=11',
+  '/static/style.css?v=16',
+  '/static/app.js?v=14',
   '/theme.css'
 ];
 
@@ -24,7 +24,7 @@ self.addEventListener('fetch', (event) => {
   if (request.mode === 'navigate') {
     event.respondWith((async () => {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
+      const timeout = setTimeout(() => controller.abort(), 20000);
       try { return await fetch(request, { signal: controller.signal }); }
       catch {
         const cache = await caches.open(CACHE_NAME);
